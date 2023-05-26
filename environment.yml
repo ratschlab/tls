@@ -1,0 +1,27 @@
+name: tls-env
+channels:
+  - defaults
+  - conda-forge
+  - pytorch
+  - anaconda
+dependencies:
+  - pip
+  - tqdm=4.60.0
+  - pandas=1.2.4
+  - python=3.8.8
+  - ipykernel=5.3.4
+  - pyarrow=3.0.0
+  - scikit-learn=0.24.1
+  - numpy=1.20.2
+  - pytables=3.6.1
+  - tensorboard=2.4.1
+  - cudatoolkit=11.3
+  - pytorch=1.11.0
+  - fdasrsf=2.2.8
+  - ignite=0.4.4
+  - pip:
+      - h5py==3.1.0
+      - gin-config==0.5.0
+      - pytest==6.2.3
+      - pathos==0.2.7
+      - scikit-fda==0.5

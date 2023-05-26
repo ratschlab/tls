@@ -1,0 +1,91 @@
+import gin.torch.external_configurables
+import tls.models.wrappers
+import tls.models.encoders
+import tls.models.utils
+import tls.data.loader
+import tls.data.utils
+
+
+EMB = 231
+LR = 3e-4
+HIDDEN = 128
+HEADS = 1
+LATENT = 2
+NUM_CLASSES = 2
+DEPTH = 1
+EMB_DEPTH = 1
+DO = 0.1
+DO_ATT = 0.1
+BS = 16
+EPOCHS = 1000
+TASK = 'Dynamic_CircFailure_12Hours'
+RES = 1
+RES_LAB = 1
+MAXLEN = 2016
+LOSS_WEIGHT = None
+REG_WEIGHT = 0.0
+REG_TYPE = None
+SMOOTHING_FN = None
+SMOOTH = False
+H_MIN = 0
+H_MAX = 288
+H_TRUE = 144
+L_SMOOTH = 0.1
+GAMMA = None
+AGG_TYPE = 'class'
+OBJ_TYPE = 'landmarking'
+
+
+# Train params
+train_common.model = @SurvivalWrapper()
+train_common.dataset_fn = @ICUVariableLengthDataset
+train_common.data_path = [path to output of pipe] #TODO User
+train_common.weight = %LOSS_WEIGHT
+train_common.do_test = True
+
+SurvivalWrapper.train.agg_type = %AGG_TYPE
+SurvivalWrapper.encoder = @Transformer()
+SurvivalWrapper.optimizer_fn = @Adam
+SurvivalWrapper.train.epochs = %EPOCHS
+SurvivalWrapper.train.batch_size = %BS
+SurvivalWrapper.train.patience = 20
+SurvivalWrapper.train.min_delta = 1e-6
+SurvivalWrapper.reg = %REG_TYPE
+SurvivalWrapper.reg_weight = %REG_WEIGHT
+SurvivalWrapper.pred_horizon = %H_TRUE
+SurvivalWrapper.objective_type = %OBJ_TYPE
+
+
+ICUVariableLengthLoaderTables.splits = ['train','test','val']
+ICUVariableLengthLoaderTables.task = %TASK
+ICUVariableLengthLoaderTables.data_resampling = %RES
+ICUVariableLengthLoaderTables.label_resampling = %RES_LAB
+ICUVariableLengthDataset.maxlen = %MAXLEN
+ICUVariableLengthLoaderTables.smooth = %SMOOTH
+ICUVariableLengthLoaderTables.max_horizon = %H_MAX
+ICUVariableLengthLoaderTables.surv = True
+get_smoothed_labels.smoothing_fn =  %SMOOTHING_FN
+get_smoothed_labels.h_true =  %H_TRUE
+get_smoothed_labels.h_min =  %H_MIN
+get_smoothed_labels.h_max =  %H_MAX
+get_smoothed_labels.gamma = %L_SMOOTH
+get_smoothed_labels.delta_h = 12
+
+
+# Optimizer params
+Adam.lr = %LR
+Adam.weight_decay = 1e-6
+
+# Encoder params
+Transformer.emb = %EMB
+Transformer.hidden = %HIDDEN
+Transformer.heads = %HEADS
+Transformer.ff_hidden_mult = %LATENT
+Transformer.depth = %DEPTH
+Transformer.num_classes = %H_MAX
+Transformer.dropout = %DO
+Transformer.dropout_att = %DO_ATT
+Transformer.embedding_layer = @MLP
+MLP.depth = %EMB_DEPTH
+
+
